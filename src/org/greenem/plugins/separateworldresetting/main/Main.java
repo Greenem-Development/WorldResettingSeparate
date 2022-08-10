@@ -43,17 +43,17 @@ public class Main extends JavaPlugin implements Listener {
 	
 	@Override
 	public void onEnable() {
-		log(pluginNameColor + pluginName + ChatColor.RESET + " plugin has been enabled!");
 		initAll();
 		ConfigOperations.updateAndLoadConfig();
 //		ManhuntCompatibility.initComoatibility();
 		finishInit();
 		instance = this;
+		log(pluginNameColor + pluginName + ChatColor.RESET + " plugin has been enabled!");
 	}
 	
 	@Override
 	public void onDisable() {
-		log(pluginNameColor + pluginName + ChatColor.RESET + " plugin has been disabled");
+		log(pluginName + ChatColor.RESET + " plugin has been disabled");
 	}
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args){

@@ -17,7 +17,7 @@ public class Stash {
 	
 	public static boolean isManhuntPluginEnabled() {
 		Plugin pl = Bukkit.getPluginManager().getPlugin(manhuntPluginName);
-		return pl.isEnabled(); // ?
+		return pl!=null && pl.isEnabled(); // ?
 	}
 	
 	public static void AddItemStack(Player p, ItemStack ItemStack, int slot) { // can be better, change this later

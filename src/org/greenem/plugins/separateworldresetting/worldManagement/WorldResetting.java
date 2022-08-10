@@ -35,7 +35,7 @@ public class WorldResetting {
 			}
 			if(!new File(serverDirectory, runFileString).exists()) {
 				sender.sendMessage(ChatColor.RED + "You haven't specified a valid server start script file name in the config! "
-						+ "(at server/plugins/configs/ManhuntAndWorldReset/" + Lines.mainConfigName + ")");
+						+ "(at server/plugins/configs/WorldResetting/" + Lines.mainConfigName + ")");
 				return;
 			}
 			

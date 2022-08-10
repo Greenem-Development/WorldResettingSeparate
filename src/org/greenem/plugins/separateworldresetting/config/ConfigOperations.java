@@ -6,8 +6,12 @@ import static org.greenem.plugins.separateworldresetting.data.References.serverD
 import static org.greenem.plugins.separateworldresetting.data.References.pluginConfigDirectory;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.greenem.plugins.separateworldresetting.data.Lines;
 import org.greenem.plugins.separateworldresetting.data.References;
@@ -44,7 +48,20 @@ public class ConfigOperations {
 			log("Error while reading \"" + currentKey + "\" from the config");
 		}
 		saveConfigIfHasChanges(c, cOld, f);
+		deleteUnnesessaryFields(c, f);
 	}
+	
+	public static List<String> allConfigValuesNames = Arrays.asList(
+			"settings.world-resetting.launch-server-script-name",
+			"settings.commands.allow-gm-command-for-ops",
+			"settings.commands.allow-heal-command-for-ops",
+			"settings.world-resetting.require-confirmation-for-world-resetting",
+			"settings.world-resetting.use-halt-for-instant-server-stopping",
+			"settings.game.delay-for-speedrunner-on-start-in-milliseconds",
+			"settings.warnings.disable-no-existing-start-file-warning",
+			"settings.game.clear-items-on-start",
+			"settings.world-resetting.allow-ops-use-world-resetting",
+			"settings.world-resetting.priority.above-mahnunt-plugin-command");
 	
 	public static Object getDefaultValue(String key) {
 		switch (key) {
@@ -94,31 +111,37 @@ public class ConfigOperations {
 	 * Returns true if found changes
 	 * **/
 	public static boolean saveConfigIfHasChanges(YamlConfiguration newConfig, YamlConfiguration oldConfig, File f) {
-		SimpleLogger.debug(newConfig.saveToString());
 		boolean hasChanges = false;
 	    for(String key : newConfig.getKeys(true)) { // missing keys added by user
-	        if(!oldConfig.contains(key)) {
-	        	hasChanges = true;
-	        	break;
-	        } else {
-	        	if(!newConfig.get(key).equals(oldConfig.get(key))) {
-	        		hasChanges = true;
+	    	if(!(oldConfig.get(key) instanceof MemorySection) || !(newConfig.get(key) instanceof MemorySection)) {
+		        if(!oldConfig.contains(key)) {
+		        	hasChanges = true;
 		        	break;
-	        	}
+		        } else {
+		        	if(!newConfig.get(key).equals(oldConfig.get(key))) {
+		        		hasChanges = true;
+//		        		try {
+//		        			SimpleLogger.debug(oldConfig.get(key) instanceof MemorySection);
+//		        			SimpleLogger.debug("break 2 " + ((MemorySection) oldConfig.get(key)).getKeys(true) + " | " + ((MemorySection) newConfig.get(key)).getKeys(true));
+//		        		} catch(ClassCastException e) {}
+			        	break;
+		        	}
+		        }
 	        }
 	    }
 	    for(String key : oldConfig.getKeys(true)) {
-	        if(!newConfig.contains(key)) {
-	        	hasChanges = true;
-	        	break;
-	        } else {
-	        	if(!newConfig.get(key).equals(oldConfig.get(key))) {
-	        		hasChanges = true;
+	    	if(!(oldConfig.get(key) instanceof MemorySection) || !(newConfig.get(key) instanceof MemorySection)) {
+		        if(!newConfig.contains(key)) {
+		        	hasChanges = true;
 		        	break;
-	        	}
-	        }
+		        } else {
+		        	if(!newConfig.get(key).equals(oldConfig.get(key))) {
+		        		hasChanges = true;
+			        	break;
+		        	}
+		        }
+	    	}
 	    }
-	    
 		if (hasChanges) {
 			try {
 				newConfig.save(f);
@@ -127,6 +150,18 @@ public class ConfigOperations {
 			}
 		}
 		return hasChanges;
+	}
+	
+	public static void deleteUnnesessaryFields(YamlConfiguration c, File f) { // think about old versions
+		YamlConfiguration cOld = YamlConfiguration.loadConfiguration(f);
+		for(String key : c.getKeys(true)) {
+			if(!(c.get(key) instanceof MemorySection)) {
+				if(!allConfigValuesNames.contains(key)) {
+					c.set(key, null);
+				}
+			}
+		}
+		saveConfigIfHasChanges(c, cOld, f);
 	}
 	
 	private static void checkStartScript(String runFileString) {
