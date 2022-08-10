@@ -1,0 +1,1 @@
+A separate and independent Minecraft plugin for the world resetting feature, built on the original AdvancedManhunt code
