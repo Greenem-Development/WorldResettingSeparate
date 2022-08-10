@@ -52,14 +52,15 @@ public class ConfigOperations {
 	}
 	
 	public static List<String> allConfigValuesNames = Arrays.asList(
+			"settings",
+			"settings.world-resetting",
+			"settings.warnings",
+			"settings.world-resetting.priority",
+			
 			"settings.world-resetting.launch-server-script-name",
-			"settings.commands.allow-gm-command-for-ops",
-			"settings.commands.allow-heal-command-for-ops",
 			"settings.world-resetting.require-confirmation-for-world-resetting",
 			"settings.world-resetting.use-halt-for-instant-server-stopping",
-			"settings.game.delay-for-speedrunner-on-start-in-milliseconds",
 			"settings.warnings.disable-no-existing-start-file-warning",
-			"settings.game.clear-items-on-start",
 			"settings.world-resetting.allow-ops-use-world-resetting",
 			"settings.world-resetting.priority.above-mahnunt-plugin-command");
 	
@@ -155,11 +156,11 @@ public class ConfigOperations {
 	public static void deleteUnnesessaryFields(YamlConfiguration c, File f) { // think about old versions
 		YamlConfiguration cOld = YamlConfiguration.loadConfiguration(f);
 		for(String key : c.getKeys(true)) {
-			if(!(c.get(key) instanceof MemorySection)) {
-				if(!allConfigValuesNames.contains(key)) {
-					c.set(key, null);
-				}
+//			if(!(c.get(key) instanceof MemorySection)) {
+			if(!allConfigValuesNames.contains(key)) {
+				c.set(key, null);
 			}
+//			}
 		}
 		saveConfigIfHasChanges(c, cOld, f);
 	}
