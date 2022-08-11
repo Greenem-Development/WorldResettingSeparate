@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
+import org.greenem.plugins.separateworldresetting.config.ConfigWatcher;
 import org.greenem.plugins.separateworldresetting.util.OsType;
 
 public class References {
@@ -18,6 +19,7 @@ public class References {
 	public static String javaString = "java"; //"\"C:\\Program Files\\Java\\jdk-17.0.1\\bin\\java\"";
 	public static OsType os;
 	public static boolean logCommandInfo = true;
+	public static ConfigWatcher configWatcher;
 	
-	public boolean replaceOtherResetter = false; //TODO this
+	public static boolean alreadySentBrokenRunFileMessage = false;
 }

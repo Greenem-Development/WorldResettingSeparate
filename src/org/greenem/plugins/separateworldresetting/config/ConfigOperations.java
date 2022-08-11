@@ -168,9 +168,14 @@ public class ConfigOperations {
 	private static void checkStartScript(String runFileString) {
 		if(ConfigData.disableNoExistingStartFileWarning) return;
 		if(!new File(serverDirectory, runFileString).exists()) {
-			String noExistingStartFileWarning = ChatColor.RED + "You haven't specified your run script file name in the config! "
-					+ "(for world reseting, but other things are fine)";
-			log(noExistingStartFileWarning);
+			if(!References.alreadySentBrokenRunFileMessage) {
+				String noExistingStartFileWarning = ChatColor.RED + "You haven't specified your run script file name in the config! "
+						+ "(for world reseting, but other things are fine)";
+				log(noExistingStartFileWarning);
+				References.alreadySentBrokenRunFileMessage = true;
+			}
+		} else {
+			References.alreadySentBrokenRunFileMessage = false;
 		}
 	}
 	

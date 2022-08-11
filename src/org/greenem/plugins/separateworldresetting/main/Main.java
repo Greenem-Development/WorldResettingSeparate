@@ -22,6 +22,7 @@ import org.greenem.plugins.separateworldresetting.compatibility.ManhuntCompatibi
 import org.greenem.plugins.separateworldresetting.completers.plain.EmptyCompleterNoArgs;
 import org.greenem.plugins.separateworldresetting.config.ConfigData;
 import org.greenem.plugins.separateworldresetting.config.ConfigOperations;
+import org.greenem.plugins.separateworldresetting.config.ConfigWatcher;
 import org.greenem.plugins.separateworldresetting.data.References;
 import org.greenem.plugins.separateworldresetting.events.MainEvents;
 import org.greenem.plugins.separateworldresetting.util.DebugModeSwitch;
@@ -53,17 +54,14 @@ public class Main extends JavaPlugin implements Listener {
 	
 	@Override
 	public void onDisable() {
+		References.configWatcher.stop();
 		log(pluginName + ChatColor.RESET + " plugin has been disabled");
 	}
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args){
-		if (cmd.getName().equalsIgnoreCase("wrreloadconfig")) {
-			if(!isSenderAPlayerOrConsole(sender)) return true;
-			MainCommands.reloadConfigCommand(sender);
-		}
-//		else if (cmd.getName().equalsIgnoreCase("mhreloadconfig")) { TODO the file update hook //TODO THE DEBUG SWITCH TOO
+//		if (cmd.getName().equalsIgnoreCase("wrreloadconfig")) {
 //			if(!isSenderAPlayerOrConsole(sender)) return true;
-//			ManhuntCommands.reloadConfigCommand(sender);
+//			MainCommands.reloadConfigCommand(sender);
 //		}
 		return true;
 	}
@@ -74,6 +72,7 @@ public class Main extends JavaPlugin implements Listener {
 		References.os = OsDependent.getSystemType();
 		registerAllCommands();
 		registerEvents();
+		startConfigWatcher();
 	}
 	
 	private void registerEvents() {
@@ -95,5 +94,10 @@ public class Main extends JavaPlugin implements Listener {
 		if(SimpleLogger.theDebugOutputEnabled) {
 			log(ChatColor.AQUA + "Debug mode is enabled");
 		}
+	}
+	
+	private void startConfigWatcher() {
+		References.configWatcher = new ConfigWatcher();
+		References.configWatcher.start();
 	}
 }
