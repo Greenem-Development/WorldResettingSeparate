@@ -18,7 +18,8 @@ import org.greenem.plugins.separateworldresetting.data.References;
 
 public class ConfigCompatibility {
 	public static void updateConfig() {
-		File f = getConfigFile();
+		File f = ConfigOperations.getConfigFile();
+		if(!ConfigOperations.checkValidStructure(f)) return;
 		f.getParentFile().mkdirs();
 		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
 		YamlConfiguration cOld = YamlConfiguration.loadConfiguration(f);
@@ -40,10 +41,6 @@ public class ConfigCompatibility {
 		moveValue(c, currentKey, newPrefixString + ".commands." + currentKey);
 		currentKey = "allow-heal-command-for-ops";
 		moveValue(c, currentKey, newPrefixString + ".commands." + currentKey);
-	}
-	
-	private static File getConfigFile() {
-		return new File(References.pluginConfigDirectory, Lines.mainConfigName);
 	}
 	
 	@Deprecated

@@ -5,6 +5,8 @@ import static org.greenem.plugins.separateworldresetting.util.SimpleLogger.debug
 import static org.greenem.plugins.separateworldresetting.data.References.serverDirectory;
 import static org.greenem.plugins.separateworldresetting.data.References.pluginConfigDirectory;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,20 +14,45 @@ import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.MemorySection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.greenem.plugins.separateworldresetting.data.Lines;
 import org.greenem.plugins.separateworldresetting.data.References;
 import org.greenem.plugins.separateworldresetting.util.SimpleLogger;
 import org.greenem.plugins.separateworldresetting.versionCompatibility.ConfigCompatibility;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.scanner.ScannerException;
 
 public class ConfigOperations {
 	public static void updateAndLoadConfig() {
+		if(!checkValidStructure(getConfigFile())) return;
 		ConfigCompatibility.updateConfig();
 		loadConfig();
 	}
 	
+	public static boolean checkValidStructure(File f) {
+		boolean result = true;
+		try {
+			new Yaml().load(new FileInputStream(f));
+		} catch (ScannerException e) {
+			SimpleLogger.log(ChatColor.RED + "Cannot load the config, structure/syntax error:\n" + e.getMessage());
+			result = false;
+		} catch (Exception e) {
+//			SimpleLogger.log(e.getClass().getCanonicalName());
+//			e.printStackTrace();
+			SimpleLogger.log(ChatColor.RED + "Cannot load the config:\n" + e.getMessage());
+			result = false;
+		}
+		return result;
+	}
+	
+	public static File getConfigFile() {
+		return new File(References.pluginConfigDirectory, Lines.mainConfigName);
+	}
+	
 	public static void loadConfig() {
-		File f = new File(pluginConfigDirectory, Lines.mainConfigName);
+		File f = getConfigFile();
+		if(!ConfigOperations.checkValidStructure(f)) return;
 		f.getParentFile().mkdirs();
 		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
 		YamlConfiguration cOld = YamlConfiguration.loadConfiguration(f);
