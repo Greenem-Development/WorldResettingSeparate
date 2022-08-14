@@ -1,6 +1,9 @@
 package org.greenem.plugins.separateworldresetting.util;
 
 import static org.greenem.plugins.separateworldresetting.util.SimpleLogger.log;
+
+import java.io.File;
+
 import static org.greenem.plugins.separateworldresetting.util.SimpleLogger.debug;
 
 import org.bukkit.Bukkit;
@@ -14,6 +17,16 @@ import org.bukkit.plugin.Plugin;
 
 public class Stash {
 	public static String manhuntPluginName = "AdvancedManhunt";
+	
+	public static boolean deleteDirectory(File directoryToBeDeleted) {
+	    File[] allContents = directoryToBeDeleted.listFiles();
+	    if (allContents != null) {
+	        for (File file : allContents) {
+	            deleteDirectory(file);
+	        }
+	    }
+	    return directoryToBeDeleted.delete();
+	}
 	
 	public static boolean isManhuntPluginEnabled() {
 		Plugin pl = Bukkit.getPluginManager().getPlugin(manhuntPluginName);

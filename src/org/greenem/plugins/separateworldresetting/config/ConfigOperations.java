@@ -8,6 +8,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +34,7 @@ public class ConfigOperations {
 	}
 	
 	public static boolean checkValidStructure(File f) {
+		replaceSlashes(f);
 		boolean result = true;
 		try {
 			new Yaml().load(new FileInputStream(f));
@@ -70,6 +74,12 @@ public class ConfigOperations {
 			ConfigData.useHaltForWorldResettings = (boolean) loadKey(c, currentKey, null, null);
 			currentKey = "settings.world-resetting.priority.above-mahnunt-plugin-command";
 			ConfigData.priorityAboveManhuntWorldResetting = (boolean) loadKey(c, currentKey, null, null);
+			currentKey = "settings.technical.delete-unnesessary-config-lines";
+			ConfigData.deleteUnnesessaryConfigLines = (boolean) loadKey(c, currentKey, null, null);
+			currentKey = "settings.world-resetting.java-path-to-use-for-the-resetting-programm";
+			ConfigData.javaPathForResettingJar = (String) loadKey(c, currentKey, null, null);
+			fixJavaPathDetails();
+			if(!checkJavaPath()) SimpleLogger.log(ChatColor.RED + Lines.javaPathNotDetected);
 			//"java-path-to-start-java-middle-script" // maybe later
 		} catch (Throwable t) {
 			log("Error while reading \"" + currentKey + "\" from the config");
@@ -83,13 +93,16 @@ public class ConfigOperations {
 			"settings.world-resetting",
 			"settings.warnings",
 			"settings.world-resetting.priority",
+			"settings.technical",
 			
 			"settings.world-resetting.launch-server-script-name",
 			"settings.world-resetting.require-confirmation-for-world-resetting",
 			"settings.world-resetting.use-halt-for-instant-server-stopping",
 			"settings.warnings.disable-no-existing-start-file-warning",
 			"settings.world-resetting.allow-ops-use-world-resetting",
-			"settings.world-resetting.priority.above-mahnunt-plugin-command");
+			"settings.world-resetting.priority.above-mahnunt-plugin-command",
+			"settings.technical.delete-unnesessary-config-lines",
+			"settings.world-resetting.java-path-to-use-for-the-resetting-programm");
 	
 	public static Object getDefaultValue(String key) {
 		switch (key) {
@@ -103,6 +116,8 @@ public class ConfigOperations {
 			case "settings.game.clear-items-on-start": return true;
 			case "settings.world-resetting.allow-ops-use-world-resetting": return true;
 			case "settings.world-resetting.priority.above-mahnunt-plugin-command": return false;
+			case "settings.technical.delete-unnesessary-config-lines": return false;
+			case "settings.world-resetting.java-path-to-use-for-the-resetting-programm": return "java";
 			default:
 				return "UNDEFINED_CONFIG_VALUE";
 		}
@@ -132,6 +147,7 @@ public class ConfigOperations {
 		if(currentKey=="settings.world-resetting.launch-server-script-name") {
 			checkStartScript((String) returnValue);
 		}
+		if(returnValue instanceof String) returnValue = ((String) returnValue).trim();
 		return returnValue;
 	}
 	
@@ -144,10 +160,12 @@ public class ConfigOperations {
 	    	if(!(oldConfig.get(key) instanceof MemorySection) || !(newConfig.get(key) instanceof MemorySection)) {
 		        if(!oldConfig.contains(key)) {
 		        	hasChanges = true;
+//		        	SimpleLogger.debug("1: " + key);
 		        	break;
 		        } else {
 		        	if(!newConfig.get(key).equals(oldConfig.get(key))) {
 		        		hasChanges = true;
+//		        		SimpleLogger.debug("2: " + key);
 //		        		try {
 //		        			SimpleLogger.debug(oldConfig.get(key) instanceof MemorySection);
 //		        			SimpleLogger.debug("break 2 " + ((MemorySection) oldConfig.get(key)).getKeys(true) + " | " + ((MemorySection) newConfig.get(key)).getKeys(true));
@@ -161,10 +179,12 @@ public class ConfigOperations {
 	    	if(!(oldConfig.get(key) instanceof MemorySection) || !(newConfig.get(key) instanceof MemorySection)) {
 		        if(!newConfig.contains(key)) {
 		        	hasChanges = true;
+//		        	SimpleLogger.debug("3: " + key);
 		        	break;
 		        } else {
 		        	if(!newConfig.get(key).equals(oldConfig.get(key))) {
 		        		hasChanges = true;
+//		        		SimpleLogger.debug("4: " + key);
 			        	break;
 		        	}
 		        }
@@ -182,17 +202,67 @@ public class ConfigOperations {
 	
 	public static void deleteUnnesessaryFields(YamlConfiguration c, File f) { // think about old versions
 		YamlConfiguration cOld = YamlConfiguration.loadConfiguration(f);
+		List<String> wrongKeys = new ArrayList<>();
 		for(String key : c.getKeys(true)) {
 //			if(!(c.get(key) instanceof MemorySection)) {
 			if(!allConfigValuesNames.contains(key)) {
-				c.set(key, null);
+				if(ConfigData.deleteUnnesessaryConfigLines) {
+					c.set(key, null);
+				}
+				wrongKeys.add(key);
 			}
 //			}
+		}
+		if(wrongKeys.size()>0) {
+			String s;
+			if(ConfigData.deleteUnnesessaryConfigLines) {
+				s = ChatColor.RED + "Unnesessary or accidentally renamed lines existed in the config and WERE DELETED. If they were renamed, a working default dublicate is somewhere there now.\nThe lines:";
+			} else {
+				s = ChatColor.RED + "Unnesessary or accidentally renamed lines exist in the config, please fix that. If they are renamed, a working default dublicate is somewhere nearby too.\\nThe lines:";
+			}
+			for (String str : wrongKeys) {
+				s += "\n" + str;
+			}
+			SimpleLogger.log(s);
 		}
 		saveConfigIfHasChanges(c, cOld, f);
 	}
 	
-	private static void checkStartScript(String runFileString) {
+	public static void replaceSlashes(File f) {
+		try {
+			Charset charset = StandardCharsets.UTF_8;
+	
+			String content = new String(Files.readAllBytes(f.toPath()), charset);
+			String newContent = fixOddNumberOfSlashes(content);
+			if(content.equals(newContent)) return;
+			Files.write(f.toPath(), newContent.getBytes(charset));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static String fixOddNumberOfSlashes(String s) {
+		String newS = "";
+		int slashes = 0;
+		for(int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+			if(c=='\\' && !(i==s.length()-1)) {
+				slashes++;
+			} else {
+				if(c=='\\') slashes++;
+				if(slashes%2==1) {
+					newS += "\\".repeat(slashes*2);
+				} else {
+					newS += "\\".repeat(slashes);
+				}
+				slashes = 0;
+				if(c!='\\') newS += c;
+			}
+		}
+		return newS;
+	}
+	
+	public static void checkStartScript(String runFileString) {
 		if(ConfigData.disableNoExistingStartFileWarning) return;
 		if(!new File(serverDirectory, runFileString).exists()) {
 			if(!References.alreadySentBrokenRunFileMessage) {
@@ -204,6 +274,20 @@ public class ConfigOperations {
 		} else {
 			References.alreadySentBrokenRunFileMessage = false;
 		}
+	}
+	
+	public static boolean checkJavaPath() {
+		String javaPath = ConfigData.javaPathForResettingJar;
+		if(javaPath.equalsIgnoreCase("java")) return true;
+		if(javaPath.contains("\\") || javaPath.contains("/")) {
+			File f = new File(javaPath);
+			return f.exists();
+		} else return false;
+	}
+	
+	public static void fixJavaPathDetails() {
+		if(ConfigData.javaPathForResettingJar.startsWith("\"")) ConfigData.javaPathForResettingJar = ConfigData.javaPathForResettingJar.substring(1);
+		if(ConfigData.javaPathForResettingJar.endsWith("\"")) ConfigData.javaPathForResettingJar = ConfigData.javaPathForResettingJar.substring(0, ConfigData.javaPathForResettingJar.length()-1);
 	}
 	
 	public static void logCastEx(String currentKey) {

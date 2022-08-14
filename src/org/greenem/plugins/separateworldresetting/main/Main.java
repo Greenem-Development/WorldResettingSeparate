@@ -88,6 +88,7 @@ public class Main extends JavaPlugin implements Listener {
 		configsDirectory = new File(serverDirectory, "plugins/configs");
 		pluginConfigDirectory = new File(configsDirectory, "WorldResetting");
 		pluginConfigDirectory.mkdirs();
+		WorldResetting.deleteWorldResettingFiles();
 	}
 	
 	private void finishInit() {

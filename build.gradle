@@ -13,7 +13,7 @@ eclipse {
 }
 
 group 'org.greenem.plugins.separateworldresetting'
-version '1.6.0'
+version '1.0.0'
 
 repositories {
     mavenCentral()
@@ -40,6 +40,7 @@ sourceSets {
 jar {
 	archiveBaseName = 'WorldResettingSeparate'
     destinationDirectory.set(file("C:/Users/andpo/Desktop/Vanya/1.18.2/plugins"))
+    //destinationDirectory.set(file("C:/Shared"))
     configurations.implementation.canBeResolved=true
     from { configurations.implementation.collect {
       //it.canBeResolved = true 

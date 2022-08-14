@@ -38,6 +38,7 @@ public class MainEvents implements Listener {
 	
 	private void processTheCommand(String cmd, String[] args, Cancellable e, CommandSender sender) {
 		if(cmd.equalsIgnoreCase("resetworld")) { // Ignore case?
+			if(e.isCancelled()) return; // to make other plugins (including my) be able to control this one a bit
 			if(!Stash.isSenderAPlayerOrConsole(sender)) return;
 			boolean mhIsOn = Stash.isManhuntPluginEnabled();
 			if(!mhIsOn || (mhIsOn && ConfigData.priorityAboveManhuntWorldResetting)) {

@@ -16,7 +16,7 @@ public class References {
 	public static File pluginConfigDirectory;
 	
 	public static String runFileString = "asdgsdfgsd";
-	public static String javaString = "java"; //"\"C:\\Program Files\\Java\\jdk-17.0.1\\bin\\java\"";
+//	public static String javaString = "java"; //"\"C:\\Program Files\\Java\\jdk-17.0.1\\bin\\java\"";
 	public static OsType os;
 	public static boolean logCommandInfo = true;
 	public static ConfigWatcher configWatcher;

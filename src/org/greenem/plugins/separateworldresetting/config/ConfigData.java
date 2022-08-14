@@ -7,4 +7,6 @@ public class ConfigData {
 	public static boolean allowWorldResetting = true;
 	
 	public static boolean priorityAboveManhuntWorldResetting = false;
+	public static boolean deleteUnnesessaryConfigLines = false;
+	public static String javaPathForResettingJar = "java";
 }
