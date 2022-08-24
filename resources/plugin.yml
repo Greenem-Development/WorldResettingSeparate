@@ -4,5 +4,10 @@ version: 1.0.0
 api-version: 1.13
 commands:
    resetworld:
-      description: DELETES THE WORLD AND RESTARTS THE SERVER, may be moved to a separate plugin later
-      permission: op
+      description: DELETES THE WORLD AND RESTARTS THE SERVER
+      permission: worldresettingseparate.resetworld
+
+permissions:
+   worldresettingseparate.resetworld:
+      description: Allow resetting the entire world
+      default: op

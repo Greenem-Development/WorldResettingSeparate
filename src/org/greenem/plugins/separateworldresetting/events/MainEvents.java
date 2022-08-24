@@ -43,7 +43,12 @@ public class MainEvents implements Listener {
 			boolean mhIsOn = Stash.isManhuntPluginEnabled();
 			if(!mhIsOn || (mhIsOn && ConfigData.priorityAboveManhuntWorldResetting)) {
 				e.setCancelled(true);
-				WorldResetting.resetWorld(sender, args);
+//				if (!sender.hasPermission("worldresettingseparate.resetworld")) {
+//					sender.sendMessage("No permissions");
+//	            }
+//	            else{
+	            WorldResetting.resetWorld(sender, args);
+//	            }
 			}
 		}
 	}
